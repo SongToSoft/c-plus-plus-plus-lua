@@ -8,6 +8,30 @@ game::game() {
 game::~game() {
 }
 
+void game::test() {
+    luaState = luaL_newstate();
+    luaL_openlibs(luaState);
+    if (checkLuaState(luaState, luaL_dofile(luaState, "luaScripts/testLuaScript.lua"))) {
+        lua_getglobal(luaState, "a");
+        if (lua_isnumber(luaState, -1)) {
+            float result = (float)lua_tonumber(luaState, -1);
+            std::cout << result << std::endl;
+        }
+
+        lua_getglobal(luaState, "AddStuff");
+        if (lua_isfunction(luaState, -1)) {
+            lua_pushnumber(luaState, 3.5f);
+            lua_pushnumber(luaState, 7.1f);
+
+            if (checkLuaState(luaState, lua_pcall(luaState, 2, 1, 0))) {
+                std::cout << "[C++] call lua Script: " << (float)lua_tonumber(luaState, -1) << std::endl;
+            }
+        }
+    }
+    std::cout << "Wait click" << std::endl;
+    std::getchar();
+}
+
 void game::start() {
     gameState = eGameState::STARTED;
     incomeTime = std::chrono::system_clock::now();
@@ -41,6 +65,10 @@ void game::draw() {
         ++keyCount;
     }
     printText("Press ESC to quit with Save");
+    if (!errorMsg.empty()) {
+        printText(errorMsg);
+        errorMsg = "";
+    }
 }
 
 void game::handleKeyboard() {
@@ -76,8 +104,7 @@ bool game::checkLuaState(lua_State* luaState, int r) {
         return true;
     }
     else {
-        std::string errorMsg = lua_tostring(luaState, -1);
-        printText(errorMsg);
+        errorMsg = lua_tostring(luaState, -1);
         return false;
     }
 }
@@ -218,7 +245,7 @@ void game::load() {
             values.push_back(loadValues.substr(0, pos));
             loadValues.erase(0, pos + delimiter.length());
         }
-        for (int i = 0; i < places.size(); ++i) {
+        for (size_t i = 0; i < places.size(); ++i) {
             places[i].count = std::stoi(values[i]);
         }
         currentCount = std::stoi(values[places.size()]);

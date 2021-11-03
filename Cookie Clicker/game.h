@@ -38,7 +38,9 @@ public:
 	game();
 	~game();
 
+	void test();
 	void start();
+
 private:
 	void update();
 	void draw();
@@ -65,6 +67,7 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> incomeTime;
 	float incomeTimeDif = 1.0f;
 	bool isSpacePressed = false;
+	std::string errorMsg = "";
 	std::pair<char, bool> pressedBuyKey = std::pair<char, bool>(' ', false);
 	std::vector<std::pair<char, int>> buyKeyboards = { std::pair<char, int>('1', 0),
 													   std::pair<char, int>('2', 1),
